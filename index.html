@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SnapBloom — Photobooth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=DM+Sans:wght@400;500;600&family=Fraunces:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#F8DDE5;--cream:#FFF9F3;--burg:#722F45;--lav:#E9E0F5;--sage:#DCE8D9;--line:rgba(114,47,69,.16);
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:'DM Sans',system-ui,sans-serif;color:var(--burg);background:var(--cream);overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--burg);outline-offset:2px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:500}
+nav{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:12px clamp(14px,4vw,48px);background:rgba(255,249,243,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.logo{font:italic 600 26px Fraunces,serif;display:flex;gap:8px;align-items:center}
+nav div a{margin-left:clamp(10px,2.5vw,26px);text-decoration:none;font-weight:500;font-size:15px}
+nav a:hover{text-decoration:underline}
+.btn{padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:#fff;font-weight:500;font-size:14px;transition:.25s}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 18px rgba(114,47,69,.15)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.p{background:var(--burg);color:var(--cream);border-color:transparent}
+.btn.big{padding:15px 30px;font-size:16px}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;max-width:1180px;margin:0 auto;padding:clamp(30px,6vw,70px) clamp(16px,4vw,48px);background:radial-gradient(50% 60% at 90% 30%,var(--lav),transparent 70%),radial-gradient(40% 50% at 0% 100%,var(--pink),transparent 70%)}
+.hero h1{font-size:clamp(38px,6vw,68px);line-height:1.04;font-style:italic}
+.hero p{margin:18px 0 26px;font-size:18px;line-height:1.55;max-width:460px;opacity:.85}
+.pvs{display:flex;gap:14px;justify-content:center;align-items:center}
+.pvs canvas{width:30%;border-radius:10px;box-shadow:0 16px 34px rgba(114,47,69,.22);transition:.4s}
+.pvs canvas:nth-child(2){transform:translateY(-22px) scale(1.08)}.pvs canvas:hover{transform:translateY(-10px) rotate(-2deg)}
+.sec{max-width:1180px;margin:0 auto;padding:44px clamp(16px,4vw,48px)}
+.sec h2{font-size:clamp(28px,4vw,40px);font-style:italic;margin-bottom:6px}.sec>p{opacity:.8;margin-bottom:22px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:14px}
+.fb{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:16px;font-size:12px;font-weight:500;transition:.25s;text-align:center}
+.fb canvas{width:66px;border-radius:6px;box-shadow:0 4px 12px rgba(114,47,69,.18)}
+.fb:hover{background:var(--pink);transform:translateY(-3px)}.fb[aria-pressed=true]{background:#fff;box-shadow:0 0 0 2px var(--burg)}
+.ed{background:linear-gradient(var(--lav),var(--pink) 140%);padding:26px clamp(8px,2vw,28px) 40px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;max-width:1500px;margin:0 auto 14px}
+.bar div{display:flex;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:290px minmax(0,1fr) 340px;gap:16px;max-width:1500px;margin:0 auto;align-items:start}
+.pn{background:rgba(255,249,243,.9);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 10px 30px rgba(114,47,69,.1)}
+.pn h3{font-size:19px;font-style:italic;margin:2px 0 8px}.pn h3:not(:first-child){margin-top:18px}
+.tabs{display:none}
+.drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px;border:2px dashed var(--line);border-radius:16px;text-align:center;font-size:13px;margin-bottom:8px;transition:.25s}
+.drop.on{background:var(--pink);border-color:var(--burg)}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:7px 12px;border-radius:99px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:500;transition:.2s}
+.chip[aria-pressed=true]{background:var(--burg);color:var(--cream)}
+.th{display:grid;grid-template-columns:50px 1fr;gap:8px;align-items:center;padding:6px;border-radius:14px;border:2px solid transparent;margin-bottom:6px;background:#fff;cursor:pointer}
+.th.sel{border-color:var(--burg)}.th img{width:50px;height:50px;object-fit:cover;border-radius:10px}
+.th .ac{display:flex;gap:2px;align-items:center;flex-wrap:wrap}
+.th .ac button,.mini{width:30px;height:30px;border-radius:9px;background:var(--lav);font-size:14px}
+.th .ac button:hover,.mini:hover{background:var(--pink)}
+.note{font-size:13px;line-height:1.45;padding:9px 12px;border-radius:12px;background:var(--sage);margin:8px 0}.note.warn{background:var(--pink)}
+.cwrap{position:relative;display:flex;justify-content:center;align-items:flex-start;background:rgba(255,255,255,.5);border-radius:22px;padding:14px;min-height:360px}
+#cv{max-width:100%;max-height:calc(100dvh - 170px);height:auto;width:auto;border-radius:6px;box-shadow:0 18px 44px rgba(114,47,69,.25);touch-action:none;cursor:grab;background:#fff}
+.empty{position:absolute;inset:14px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;pointer-events:none;font:italic 500 20px Fraunces,serif;transition:.3s}
+.empty span{background:rgba(255,249,243,.9);padding:12px 20px;border-radius:18px}.empty.h{opacity:0}
+label.f{display:grid;grid-template-columns:96px 1fr 34px;gap:8px;align-items:center;font-size:13px;margin:7px 0}
+label.f output{font-size:12px;opacity:.7;text-align:right}
+label.t{display:block;font-size:13px;margin:7px 0}label.t input,label.t select{width:100%;margin-top:3px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#fff}
+input[type=range]{accent-color:var(--burg);width:100%;height:28px}input[type=color]{padding:0;height:34px}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+.sg button{aspect-ratio:1;border-radius:12px;background:#fff;border:1px solid var(--line);transition:.2s;padding:3px}.sg button:hover{background:var(--pink);transform:scale(1.07)}
+.sg canvas{width:100%;height:100%}
+.sub{display:none}.sub.on{display:block;animation:in .3s}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.modal{position:fixed;inset:0;z-index:40;background:rgba(114,47,69,.5);display:none;align-items:center;justify-content:center;padding:14px}.modal.on{display:flex}
+.mb{background:var(--cream);border-radius:24px;padding:16px;width:min(100%,520px);text-align:center;position:relative}
+.mb video{width:100%;border-radius:16px;background:#000;transform:scaleX(-1)}
+#cd{position:absolute;left:0;right:0;top:34%;font:italic 600 90px Fraunces,serif;color:#fff;text-shadow:0 4px 20px rgba(0,0,0,.5)}
+#msg{position:fixed;left:50%;bottom:20px;transform:translate(-50%,30px);background:var(--burg);color:var(--cream);padding:11px 20px;border-radius:99px;font-size:14px;opacity:0;transition:.35s;z-index:50;max-width:92vw;text-align:center;pointer-events:none}#msg.on{opacity:1;transform:translate(-50%,0)}
+.about{text-align:center;max-width:640px;margin:0 auto;line-height:1.6}footer{text-align:center;padding:24px;font-size:13px;opacity:.7}
+@media(max-width:1060px){
+ .grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr;text-align:center}.hero p{margin-inline:auto}
+ .tabs{display:flex;gap:6px;max-width:1500px;margin:0 auto 12px}.tabs .chip{flex:1;padding:11px 8px}
+ .grid>.pn{display:none}.ed[data-tab=left] #L,.ed[data-tab=right] #R{display:block}.grid>.cwrap{order:-1}
+ #cv{max-height:70vh}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<nav><a class="logo" href="#home" style="text-decoration:none"><svg width="26" height="26" viewBox="0 0 26 26"><rect x="2" y="7" width="22" height="15" rx="5" fill="#722F45"/><circle cx="13" cy="14.5" r="4.6" fill="#F8DDE5"/><circle cx="13" cy="14.5" r="2" fill="#722F45"/><path d="M8 7l1.5-3h7L18 7" fill="#722F45"/><path d="M21 3l.8 1.8 1.8.8-1.8.8L21 8.2l-.8-1.8-1.8-.8 1.8-.8z" fill="#E9B8C8"/></svg>SnapBloom</a>
+<div><a href="#home">Home</a><a href="#create">Create</a><a href="#frames">Frames</a><a href="#about">About</a></div></nav>
+
+<header class="hero" id="home"><div><h1>Your Little Moments, Beautifully Captured.</h1><p>Upload or snap your favorite photos, pick a dreamy frame, add tiny stickers, and download a photo strip that feels like a Korean photobooth keepsake.</p><button class="btn p big" id="cta">Create Your Photo Strip</button></div><div class="pvs" id="pvs"></div></header>
+
+<section class="sec" id="frames"><h2>Twelve frames, each with its own mood</h2><p>Tap one to start your strip with it.</p><div class="fg" id="fg2"></div></section>
+
+<section class="ed" id="create" data-tab="left">
+ <div class="bar"><div><button class="btn" id="undo">↶ Undo</button><button class="btn" id="redo">↷ Redo</button><button class="btn" id="reset">Reset design</button></div><div><button class="btn" id="newb">Start new strip</button><button class="btn p" id="dl">Download My Strip</button></div></div>
+ <div class="tabs"><button class="chip" data-tab="left" aria-pressed="true">Photos</button><button class="chip" data-tab="center" aria-pressed="false">Preview</button><button class="chip" data-tab="right" aria-pressed="false">Design</button></div>
+ <div class="grid">
+  <aside class="pn" id="L">
+   <h3>Your photos</h3>
+   <label class="drop" id="drop"><b>Upload photos</b><span>Click or drop images here (JPG, PNG, WebP, up to 20 MB)</span><input id="file" type="file" accept="image/*" multiple hidden></label>
+   <button class="btn" id="cam" style="width:100%">Take photos with camera</button>
+   <div id="list" style="margin-top:10px"></div><p class="note" id="lnote"></p>
+   <h3>Strip layout</h3><div class="row" id="lay"></div>
+   <h3>Photos per strip</h3><div class="row" id="cnt"></div><p class="note warn" id="need" hidden></p>
+  </aside>
+  <div class="cwrap" id="cw"><canvas id="cv" aria-label="Photo strip preview"></canvas><div class="empty" id="empty"><span>Add photos to fill your strip<br><small style="font:14px 'DM Sans'">Upload from your device or use the camera</small></span></div></div>
+  <aside class="pn" id="R">
+   <div class="row" id="rt"></div>
+   <div class="sub on" data-p="fr"><h3>Frames</h3><div class="fg" id="fg" style="grid-template-columns:repeat(3,1fr)"></div></div>
+   <div class="sub" data-p="st"><h3>Stickers</h3><div class="row" id="sc" style="margin-bottom:8px"></div><div class="sg" id="sg"></div>
+    <h3>Selected sticker</h3><div class="row"><button class="chip" id="s-dup">Duplicate</button><button class="chip" id="s-del">Delete</button><button class="chip" id="s-up">Bring forward</button><button class="chip" id="s-dn">Send back</button></div>
+    <label class="f">Size<input type="range" id="s-sz" min="0.3" max="4" step="0.05"><output></output></label><label class="f">Rotate<input type="range" id="s-rt" min="-180" max="180"><output></output></label>
+    <p class="note">Drag a sticker to move it. Drag its corner handle to resize and rotate.</p></div>
+   <div class="sub" data-p="fi"><h3>Filters</h3><p class="note" id="fnote"></p><div class="row" id="pre"></div><div id="sl"></div><button class="chip" id="fres" style="margin-top:8px">Reset filters</button></div>
+   <div class="sub" data-p="sy"><h3>Strip style</h3>
+    <label class="f">Strip width<input type="range" id="pw" min="320" max="560"><output></output></label><label class="f">Spacing<input type="range" id="gap" min="0" max="50"><output></output></label><label class="f">Border<input type="range" id="pad" min="16" max="72"><output></output></label>
+    <label class="t">Photo shape<select id="ratio"><option>4:3</option><option>1:1</option><option>3:4</option><option>16:9</option></select></label>
+    <label class="t">Background color<input type="color" id="bg"></label>
+    <div class="row" style="margin:6px 0"><button class="chip" id="rd">Rounded corners</button><button class="chip" id="sq">Square corners</button></div>
+    <label class="t">Title<input id="title" maxlength="28" placeholder="Our day"></label><label class="t">Caption<input id="cap" maxlength="40" placeholder="a little memory"></label>
+    <label class="t" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="date" style="width:auto;margin:0"> Show today's date</label>
+    <p class="note">Drag a photo inside the preview to adjust its crop.</p></div>
+  </aside>
+ </div>
+</section>
+
+<section class="sec" id="about"><div class="about"><h2>About SnapBloom</h2><p>SnapBloom is a tiny photobooth that lives in your browser. Your photos never leave your device: everything is edited and exported locally on a canvas, so what you see is what you download.</p></div></section>
+<footer>Made with care. Your photos stay on your device.</footer>
+
+<div class="modal" id="cm"><div class="mb"><video id="vid" autoplay playsinline muted></video><div id="cd"></div><p class="note" id="cn">Allow camera access when your browser asks.</p>
+ <label class="t" style="display:flex;gap:8px;justify-content:center"><input type="checkbox" id="ct" style="width:auto;margin:0"> 3-second countdown</label>
+ <div class="row" style="justify-content:center;margin-top:8px"><button class="btn p" id="snap">Capture</button><button class="btn" id="cdone">Done</button></div></div></div>
+<input id="rep" type="file" accept="image/*" hidden>
+<div id="msg" role="status"></div>
+
+<script>
+/* ===== helpers ===== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const IMG={},TH={};let uid=1,hist=[],hi=-1,LAY=null;
+const DEF=()=>({photos:[],layout:'vertical',n:4,ratio:'4:3',pw:420,gap:16,pad:36,bg:'#F8DDE5',round:1,frame:'coquette',title:'',cap:'',date:1,st:[],sp:null,ss:null});
+let S=DEF();
+let mt;function msg(t){const m=$('#msg');m.textContent=t;m.classList.add('on');clearTimeout(mt);mt=setTimeout(()=>m.classList.remove('on'),3200)}
+const RATIO={'4:3':4/3,'1:1':1,'3:4':3/4,'16:9':16/9};
+function rr(c,x,y,w,h,r){r=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function hp(c,x,y,s){c.beginPath();c.moveTo(x,y+s*.38);c.bezierCurveTo(x-s*.7,y-s*.1,x-s*.3,y-s*.7,x,y-s*.28);c.bezierCurveTo(x+s*.3,y-s*.7,x+s*.7,y-s*.1,x,y+s*.38);c.closePath()}
+function sp(c,x,y,R,r,n){c.beginPath();for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,k=i%2?r:R;c.lineTo(x+Math.cos(a)*k,y+Math.sin(a)*k)}c.closePath()}
+function circ(c,x,y,r,f){c.beginPath();c.arc(x,y,r,0,7);if(f){c.fillStyle=f;c.fill()}}
+function bow(c,x,y,s,col){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle=col;c.strokeStyle='rgba(114,47,69,.35)';c.lineWidth=2;[1,-1].forEach(d=>{c.beginPath();c.moveTo(0,0);c.lineTo(d*46,-30);c.quadraticCurveTo(d*56,0,d*46,30);c.closePath();c.fill();c.stroke()});circ(c,0,0,11,col);c.stroke();c.restore()}
+function flw(c,x,y,s,col,mid){for(let i=0;i<5;i++){const a=i*Math.PI*.4;circ(c,x+Math.cos(a)*s*.55,y+Math.sin(a)*s*.55,s*.42,col)}circ(c,x,y,s*.38,mid)}
+function edge(W,H,i,st,f){for(let x=i;x<=W-i;x+=st){f(x,i);f(x,H-i)}for(let y=i+st;y<=H-i-st;y+=st){f(i,y);f(W-i,y)}}
+const grad=(c,W,H,a,b,al)=>{const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,a);g.addColorStop(1,b);c.save();c.globalAlpha=al;c.fillStyle=g;c.fillRect(0,0,W,H);c.restore()};
+/* ===== frames ===== */
+const F={
+ coquette:{n:'Coquette Pink',bg:'#F8DDE5',ink:'#722F45',draw(c,W,H){edge(W,H,10,22,(x,y)=>circ(c,x,y,4,'#fff'));[[24,24],[W-24,24],[24,H-24],[W-24,H-24]].forEach(p=>bow(c,p[0],p[1],.45,'#E8718F'))}},
+ korean:{n:'Korean White',bg:'#FFFFFF',ink:'#555',draw(c,W,H){c.strokeStyle='#e4dfe0';c.lineWidth=2;c.strokeRect(12,12,W-24,H-24)}},
+ film:{n:'Vintage Film',bg:'#2B2423',ink:'#FFF9F3',draw(c,W,H){c.fillStyle='#FFF9F3';for(let y=14;y<H-20;y+=34){rr(c,7,y,12,18,3);c.fill();rr(c,W-19,y,12,18,3);c.fill()}}},
+ scrap:{n:'Cream Scrapbook',bg:'#FFF9F3',ink:'#722F45',draw(c,W,H){c.setLineDash([7,5]);c.strokeStyle='#c9a98a';c.lineWidth=2;c.strokeRect(12,12,W-24,H-24);c.setLineDash([]);[[26,22,-.6],[W-26,H-22,-.6]].forEach(t=>{c.save();c.translate(t[0],t[1]);c.rotate(t[2]);c.fillStyle='rgba(232,150,175,.75)';c.fillRect(-40,-11,80,22);c.fillStyle='rgba(255,255,255,.45)';for(let i=-36;i<40;i+=14)c.fillRect(i,-11,6,22);c.restore()})}},
+ lavender:{n:'Lavender Dream',bg:'#E9E0F5',ink:'#5b3f7a',draw(c,W,H){grad(c,W,H,'#fff','#F8DDE5',.55);let k=0;edge(W,H,14,30,(x,y)=>{k++;c.fillStyle=k%3?'#fff':'#c9b3ea';sp(c,x,y,k%3?6:10,2.2,4);c.fill()})}},
+ burgundy:{n:'Burgundy Editorial',bg:'#722F45',ink:'#F8DDE5',draw(c,W,H){c.strokeStyle='#F8DDE5';c.lineWidth=2;c.strokeRect(9,9,W-18,H-18);c.lineWidth=.8;c.strokeRect(16,16,W-32,H-32)}},
+ y2k:{n:'Y2K Chrome',bg:'#F5C6E0',ink:'#4a2a6a',draw(c,W,H){grad(c,W,H,'#fff','#C9B8F5',.6);c.strokeStyle='#fff';c.lineWidth=7;rr(c,8,8,W-16,H-16,22);c.stroke();[[26,26,16],[W-26,26,12],[26,H-26,12],[W-26,H-26,16]].forEach(p=>{const g=c.createLinearGradient(p[0]-p[2],p[1]-p[2],p[0]+p[2],p[1]+p[2]);g.addColorStop(0,'#fff');g.addColorStop(.5,'#b9b6d8');g.addColorStop(1,'#fff');c.fillStyle=g;sp(c,p[0],p[1],p[2],p[2]*.28,4);c.fill()});edge(W,H,22,26,(x,y)=>circ(c,x,y,2.5,'#fff'))}},
+ floral:{n:'Floral Garden',bg:'#DCE8D9',ink:'#4d6a4a',draw(c,W,H){let k=0;edge(W,H,16,40,(x,y)=>{circ(c,x+10,y+4,5,'#9fc09c');flw(c,x,y,14,k++%2?'#F8DDE5':'#fff',k%2?'#FFD873':'#F3A6BC')})}},
+ hearts:{n:'Pastel Hearts',bg:'#FCE6EC',ink:'#B8456B',draw(c,W,H){let k=0;edge(W,H,16,26,(x,y)=>{c.fillStyle=['#F4A6BE','#E9E0F5','#fff','#DCE8D9'][k++%4];hp(c,x,y,k%2?18:13);c.fill()})}},
+ bw:{n:'Black & White',bg:'#FFFFFF',ink:'#111',draw(c,W,H){c.strokeStyle='#111';c.lineWidth=9;c.strokeRect(4,4,W-8,H-8);c.lineWidth=1.5;c.strokeRect(16,16,W-32,H-32)}},
+ polaroid:{n:'Polaroid Tape',bg:'#EFE9E1',ink:'#5a4a40',draw(c,W,H){c.save();c.translate(W/2,10);c.rotate(-.04);c.fillStyle='rgba(248,221,229,.9)';c.fillRect(-46,-12,92,24);c.restore()}},
+ minimal:{n:'Minimal Clean',bg:'#FFF9F3',ink:'#722F45',draw(){}}
+};
+/* ===== stickers (unit box -50..50) ===== */
+const gold='#FFD873',pk='#E8718F';
+const D={
+ heart:c=>{c.fillStyle=pk;hp(c,0,0,100);c.fill();circ(c,-18,-14,6,'rgba(255,255,255,.6)')},
+ bow:c=>bow(c,0,0,.95,pk),
+ star:c=>{c.fillStyle=gold;c.strokeStyle='#E8B04A';c.lineWidth=4;c.lineJoin='round';sp(c,0,2,46,20,5);c.fill();c.stroke()},
+ flower:c=>flw(c,0,0,70,'#F8B4C8','#FFD873'),
+ cherry:c=>{c.strokeStyle='#5f8f5a';c.lineWidth=4;c.beginPath();c.moveTo(-18,18);c.quadraticCurveTo(-10,-30,10,-42);c.moveTo(18,22);c.quadraticCurveTo(14,-20,10,-42);c.stroke();circ(c,-18,26,17,'#D8305A');circ(c,18,28,17,'#E8486C');circ(c,-23,21,4,'rgba(255,255,255,.6)');c.fillStyle='#8fbf86';c.beginPath();c.ellipse(24,-38,14,7,-.4,0,7);c.fill()},
+ butterfly:c=>{[[1],[-1]].forEach(([d])=>{c.fillStyle='#C9B3EA';c.beginPath();c.ellipse(d*22,-14,22,26,d*.5,0,7);c.fill();c.fillStyle='#F8B4C8';c.beginPath();c.ellipse(d*16,22,15,19,-d*.4,0,7);c.fill()});c.fillStyle='#722F45';c.fillRect(-3,-30,6,58)},
+ cloud:c=>{c.fillStyle='#fff';c.strokeStyle='#C9D8F0';c.lineWidth=3;c.beginPath();c.arc(-24,8,18,Math.PI*.5,Math.PI*1.5);c.arc(-6,-10,22,Math.PI,0);c.arc(22,0,18,Math.PI*1.5,Math.PI*.5);c.closePath();c.fill();c.stroke()},
+ sparkle:c=>{c.fillStyle=gold;c.strokeStyle='#E8B04A';c.lineWidth=2;sp(c,0,0,48,10,4);c.fill();c.stroke();c.fillStyle='#fff';sp(c,28,-30,12,3,4);c.fill()},
+ smile:c=>{circ(c,0,0,42,'#FFE08A');c.strokeStyle='#722F45';c.lineWidth=4;c.stroke();circ(c,-14,-8,4.5,'#722F45');circ(c,14,-8,4.5,'#722F45');c.beginPath();c.arc(0,4,20,.2,Math.PI-.2);c.stroke();circ(c,-26,8,7,'rgba(240,120,150,.5)');circ(c,26,8,7,'rgba(240,120,150,.5)')},
+ ribbon:c=>{c.fillStyle='#F4A6BE';c.beginPath();c.moveTo(-8,0);c.lineTo(-30,44);c.lineTo(-18,38);c.lineTo(-8,48);c.lineTo(4,6);c.fill();c.beginPath();c.moveTo(8,0);c.lineTo(30,44);c.lineTo(18,38);c.lineTo(8,48);c.lineTo(-4,6);c.fill();bow(c,0,-14,.6,pk)},
+ washi:c=>{c.save();c.rotate(-.12);c.fillStyle='rgba(180,160,230,.7)';c.fillRect(-48,-14,96,28);c.fillStyle='rgba(255,255,255,.55)';for(let x=-44;x<46;x+=16)c.fillRect(x,-14,7,28);c.restore()},
+ doodle:c=>{c.strokeStyle=pk;c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(-44,6);for(let i=0;i<5;i++)c.quadraticCurveTo(-34+i*18,-26,-26+i*18,6);c.stroke();c.strokeStyle='#8fbf86';c.beginPath();c.moveTo(-40,26);c.lineTo(40,26);c.stroke()},
+ label:c=>{c.fillStyle='#FFF9F3';c.strokeStyle='#722F45';c.lineWidth=2.5;rr(c,-46,-20,92,40,8);c.fill();c.stroke();c.fillStyle='#722F45';c.font='28px Caveat,cursive';c.textAlign='center';c.textBaseline='middle';c.fillText('cutie ♡',0,2)},
+ stamp:c=>{c.strokeStyle='#722F45';c.lineWidth=3;c.setLineDash([5,4]);circ(c,0,0,42);c.stroke();c.setLineDash([]);circ(c,0,0,32);c.stroke();c.fillStyle='#722F45';c.font='italic 600 15px Fraunces,serif';c.textAlign='center';c.textBaseline='middle';c.fillText('SNAP',0,-5);c.fillText('BLOOM',0,12)},
+ paper:c=>{c.fillStyle='#FFF9F3';c.strokeStyle='#d9c3a8';c.lineWidth=2;c.beginPath();c.moveTo(-38,-44);c.lineTo(38,-44);c.lineTo(38,22);c.lineTo(14,46);c.lineTo(-38,46);c.closePath();c.fill();c.stroke();c.fillStyle='#EBD7C0';c.beginPath();c.moveTo(38,22);c.lineTo(14,22);c.lineTo(14,46);c.fill();c.strokeStyle='#F4A6BE';c.lineWidth=2;for(let y=-28;y<22;y+=14){c.beginPath();c.moveTo(-28,y);c.lineTo(28,y);c.stroke()}},
+ party:c=>{c.fillStyle='#B9A3E8';c.beginPath();c.moveTo(0,-44);c.lineTo(32,40);c.lineTo(-32,40);c.closePath();c.fill();c.fillStyle='#F8DDE5';for(let i=0;i<3;i++){c.beginPath();c.moveTo(-18+i*18,38);c.lineTo(-8+i*18,10);c.lineTo(-2+i*18,38);c.fill()}circ(c,0,-44,8,gold);c.fillStyle=pk;c.fillRect(-34,38,68,7)},
+ tulip:c=>{c.strokeStyle='#6fa069';c.lineWidth=5;c.beginPath();c.moveTo(0,46);c.lineTo(0,0);c.stroke();c.fillStyle='#8fbf86';c.beginPath();c.ellipse(-14,28,16,6,-.6,0,7);c.fill();c.fillStyle='#F4A6BE';c.beginPath();c.moveTo(-24,-34);c.lineTo(-12,-18);c.lineTo(0,-36);c.lineTo(12,-18);c.lineTo(24,-34);c.quadraticCurveTo(30,8,0,10);c.quadraticCurveTo(-30,8,-24,-34);c.fill()},
+ snow:c=>{c.strokeStyle='#8fb4e0';c.lineWidth=4;c.lineCap='round';for(let i=0;i<3;i++){c.save();c.rotate(i*Math.PI/3);c.beginPath();c.moveTo(0,-44);c.lineTo(0,44);c.moveTo(-9,-32);c.lineTo(0,-24);c.lineTo(9,-32);c.moveTo(-9,32);c.lineTo(0,24);c.lineTo(9,32);c.stroke();c.restore()}},
+ fstar:c=>{c.fillStyle='#C8964A';c.strokeStyle='#722F45';c.lineWidth=3;c.lineJoin='round';sp(c,0,0,46,24,8);c.fill();c.stroke();circ(c,0,0,9,'#FFD873')}
+};
+const SN={heart:'Heart',bow:'Bow',star:'Star',flower:'Flower',cherry:'Cherries',butterfly:'Butterfly',cloud:'Cloud',sparkle:'Sparkle',smile:'Smiley',ribbon:'Ribbon',washi:'Washi tape',doodle:'Doodle',label:'Label',stamp:'Stamp',paper:'Paper note',party:'Party hat',tulip:'Spring tulip',snow:'Snowflake',fstar:'Festive star'};
+const CATS={Cute:['heart','bow','star','flower','cherry','butterfly','cloud','sparkle','smile','ribbon'],Scrapbook:['washi','doodle','label','stamp','paper'],Seasonal:['party','tulip','snow','fstar']};
+function stk(c,t){c.save();c.translate(t.x,t.y);c.rotate(t.r*Math.PI/180);c.scale(t.s,t.s);c.textBaseline='alphabetic';c.textAlign='start';D[t.k](c);c.restore()}
+/* ===== filters ===== */
+const NF={b:100,c:100,s:100,w:0,sep:0,g:0,t:''};
+const PRE={Original:{},Vintage:{b:105,c:92,s:85,w:40,sep:35},Pink:{b:104,c:96,s:112,w:10,t:'rgba(248,150,190,.38)'},Lavender:{b:102,c:96,s:105,w:-20,t:'rgba(180,160,240,.4)'},Sepia:{sep:100},Grayscale:{g:100}};
+const SLD=[['b','Brightness',50,150],['c','Contrast',50,150],['s','Saturation',0,200],['w','Warmth',-100,100],['sep','Sepia',0,100],['g','Grayscale',0,100]];
+function cover(c,im,x,y,w,h,p){const iw=im.width,ih=im.height,k=Math.max(w/iw,h/ih),sw=w/k,sh=h/k;c.drawImage(im,(iw-sw)*p.cx,(ih-sh)*p.cy,sw,sh,x,y,w,h)}
+/* ===== layout ===== */
+function layout(){
+ const n=S.n,p=S.pad,g=S.gap,r=S.layout==='grid'?1:RATIO[S.ratio],pw=S.pw;
+ const ft=(S.title?42:0)+(S.cap?34:0)+(S.date?26:0)+((S.title||S.cap||S.date)?14:0);let W,H,sl=[];
+ if(S.layout==='vertical'){const h=pw/r;W=pw+2*p;H=2*p+n*h+(n-1)*g+ft;for(let i=0;i<n;i++)sl.push({x:p+pw/2,y:p+h/2+i*(h+g),w:pw,h,r:0})}
+ else if(S.layout==='horizontal'){const w=pw*.62,h=w/r;W=2*p+n*w+(n-1)*g;H=2*p+h+ft;for(let i=0;i<n;i++)sl.push({x:p+w/2+i*(w+g),y:p+h/2,w,h,r:0})}
+ else if(S.layout==='grid'){const cols=n==3||n>4?3:2,rows=Math.ceil(n/cols),w=pw*(cols==2?.7:.5),h=w;W=2*p+cols*w+(cols-1)*g;H=2*p+rows*h+(rows-1)*g+ft;for(let i=0;i<n;i++)sl.push({x:p+w/2+(i%cols)*(w+g),y:p+h/2+Math.floor(i/cols)*(h+g),w,h,r:0})}
+ else{const w=pw*.6,h=w/r,cw=w+28,ch=h+60,rows=Math.ceil(n/2);W=2*p+2*cw+g+14;H=2*p+rows*ch+(rows-1)*(g+4)+ft+22;for(let i=0;i<n;i++)sl.push({x:p+cw/2+14+(i%2)*(cw+g),y:p+22+14+h/2+Math.floor(i/2)*(ch+g+4)+(i%2?18:0),w,h,r:[-3,2.5,-1.5,3,-2.5,1.5][i]*Math.PI/180,card:1})}
+ return{W:Math.round(W),H:Math.round(H),sl,ty:Math.round(H-p-ft+34)};
+}
+/* ===== render ===== */
+function slot(c,s,p,ui){
+ c.save();c.translate(s.x,s.y);c.rotate(s.r);
+ if(s.card){c.shadowColor='rgba(0,0,0,.2)';c.shadowBlur=14;c.shadowOffsetY=4;c.fillStyle='#fff';c.fillRect(-s.w/2-14,-s.h/2-14,s.w+28,s.h+60);c.shadowColor='transparent'}
+ const rad=s.card?2:S.round?Math.min(20,s.w*.05):0;
+ c.save();rr(c,-s.w/2,-s.h/2,s.w,s.h,rad);c.clip();
+ if(p){const f=p.f;c.filter=`brightness(${f.b}%) contrast(${f.c}%) saturate(${f.s}%) sepia(${f.sep}%) grayscale(${f.g}%)`;cover(c,IMG[p.id],-s.w/2,-s.h/2,s.w,s.h,p);c.filter='none';
+  const ov=(col,m)=>{c.globalCompositeOperation=m;c.fillStyle=col;c.fillRect(-s.w/2,-s.h/2,s.w,s.h);c.globalCompositeOperation='source-over'};
+  if(f.w)ov(f.w>0?`rgba(255,140,60,${f.w/100*.4})`:`rgba(70,130,255,${-f.w/100*.4})`,'overlay');if(f.t)ov(f.t,'soft-light')}
+ else{c.fillStyle='rgba(255,255,255,.55)';c.fillRect(-s.w/2,-s.h/2,s.w,s.h);c.fillStyle='rgba(114,47,69,.35)';c.font='42px DM Sans,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('+',0,0)}
+ c.restore();
+ if(ui&&p&&p.id===S.sp){c.strokeStyle='#722F45';c.lineWidth=4;c.setLineDash([10,6]);rr(c,-s.w/2-5,-s.h/2-5,s.w+10,s.h+10,rad+4);c.stroke()}
+ c.restore();
+}
+function render(c,k,ui){
+ const l=layout();c.setTransform(k,0,0,k,0,0);c.clearRect(0,0,l.W,l.H);c.fillStyle=S.bg;c.fillRect(0,0,l.W,l.H);
+ F[S.frame].draw(c,l.W,l.H);
+ const ph=S.photos.filter(p=>p.inc);l.sl.forEach((s,i)=>slot(c,s,ph[i],ui));
+ c.fillStyle=F[S.frame].ink;c.textAlign='center';c.textBaseline='alphabetic';let y=l.ty;
+ if(S.title){c.font='italic 600 34px Fraunces,Georgia,serif';c.fillText(S.title,l.W/2,y);y+=42}
+ if(S.cap){c.font='500 28px Caveat,cursive';c.fillText(S.cap,l.W/2,y);y+=34}
+ if(S.date){c.font='500 16px "DM Sans",sans-serif';c.globalAlpha=.7;c.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}),l.W/2,y);c.globalAlpha=1}
+ S.st.forEach(t=>stk(c,t));
+ if(ui){const t=S.st.find(t=>t.id===S.ss);if(t){c.save();c.translate(t.x,t.y);c.rotate(t.r*Math.PI/180);c.strokeStyle='#722F45';c.lineWidth=2;c.setLineDash([6,4]);c.strokeRect(-50*t.s,-50*t.s,100*t.s,100*t.s);c.setLineDash([]);const h=hnd(t,l);c.restore();
+  const hr=18/ds();c.fillStyle='#722F45';c.beginPath();c.arc(h.x,h.y,hr,0,7);c.fill();c.fillStyle='#fff';c.font=`${hr*1.3}px sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText('⤡',h.x,h.y+1)}}
+ return l;
+}
+const ds=()=>$('#cv').clientWidth/$('#cv').width||1;
+function hnd(t){const a=t.r*Math.PI/180,d=50*t.s,x=d,y=d;return{x:t.x+x*Math.cos(a)-y*Math.sin(a),y:t.y+x*Math.sin(a)+y*Math.cos(a)}}
+function draw(){const cv=$('#cv'),l=layout();if(cv.width!==l.W||cv.height!==l.H){cv.width=l.W;cv.height=l.H}LAY=render(cv.getContext('2d'),1,true)}
+/* ===== history ===== */
+const snap=()=>JSON.stringify(S);
+function commit(){hist=hist.slice(0,hi+1);hist.push(snap());if(hist.length>80)hist.shift();hi=hist.length-1;sync()}
+function go(i){if(i<0||i>=hist.length)return;hi=i;S=JSON.parse(hist[i]);sync(true)}
+/* ===== photos ===== */
+async function addFiles(files){
+ const bad=[];let ok=0;
+ for(const f of files){
+  if(!f.type.startsWith('image/')){bad.push(f.name+' is not an image');continue}
+  if(f.size>20*1048576){bad.push(f.name+' is over 20 MB');continue}
+  try{addPhoto(await load(f));ok++}catch(e){bad.push(f.name+' could not be read')}
+ }
+ if(ok)commit();
+ if(bad.length)msg('Skipped: '+bad.slice(0,2).join('; ')+(bad.length>2?'…':''));
+}
+function load(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,1800/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
+function thumb(c){const t=document.createElement('canvas');t.width=t.height=100;const k=Math.max(100/c.width,100/c.height);t.getContext('2d').drawImage(c,(100-c.width*k)/2,(100-c.height*k)/2,c.width*k,c.height*k);return t.toDataURL('image/jpeg',.7)}
+function addPhoto(c){const id=uid++;IMG[id]=c;TH[id]=thumb(c);S.photos.push({id,inc:1,cx:.5,cy:.5,f:{...NF}});S.sp=id;S.ss=null}
+$('#file').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
+const drop=$('#drop');['dragover','dragenter'].forEach(v=>drop.addEventListener(v,e=>{e.preventDefault();drop.classList.add('on')}));['dragleave','drop'].forEach(v=>drop.addEventListener(v,e=>{e.preventDefault();drop.classList.remove('on')}));
+drop.addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
+let repId=null;
+$('#rep').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!repId)return;if(!f.type.startsWith('image/')||f.size>20*1048576){msg('Please choose an image under 20 MB.');return}try{const c=await load(f);IMG[repId]=c;TH[repId]=thumb(c);commit()}catch(_){msg('That image could not be read.')}};
+$('#list').addEventListener('click',e=>{
+ const el=e.target.closest('.th');if(!el)return;const id=+el.dataset.id,i=S.photos.findIndex(p=>p.id===id),a=e.target.closest('button,input');
+ if(!a){S.sp=id;S.ss=null;sync();return}
+ const k=a.dataset.a;
+ if(k==='inc'){S.photos[i].inc=a.checked?1:0;commit()}
+ else if(k==='up'&&i>0){[S.photos[i-1],S.photos[i]]=[S.photos[i],S.photos[i-1]];commit()}
+ else if(k==='dn'&&i<S.photos.length-1){[S.photos[i+1],S.photos[i]]=[S.photos[i],S.photos[i+1]];commit()}
+ else if(k==='rep'){repId=id;$('#rep').click()}
+ else if(k==='del'){S.photos.splice(i,1);if(S.sp===id)S.sp=null;commit()}
+});
+/* ===== camera ===== */
+let stream=null;
+$('#cam').onclick=async()=>{
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg('Camera is not available here. You can still upload photos.');return}
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});$('#vid').srcObject=stream;$('#cm').classList.add('on');$('#cn').textContent='Smile! Captured photos are added to your list.'}
+ catch(e){msg('Camera access was blocked or unavailable. You can still upload photos.')}
+};
+function closeCam(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('#vid').srcObject=null;$('#cm').classList.remove('on')}
+$('#cdone').onclick=closeCam;
+function shot(){const v=$('#vid');if(!v.videoWidth){msg('Camera is not ready yet.');return}const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');x.translate(c.width,0);x.scale(-1,1);x.drawImage(v,0,0);addPhoto(c);commit();$('#cn').textContent=`Captured! ${S.photos.length} photo(s) so far.`}
+$('#snap').onclick=async()=>{const b=$('#snap');if($('#ct').checked){b.disabled=true;for(let i=3;i>0;i--){$('#cd').textContent=i;await new Promise(r=>setTimeout(r,1000))}$('#cd').textContent='';b.disabled=false}shot()};
+/* ===== UI build ===== */
+function mkThumbs(host,cb,small){host.innerHTML='';Object.keys(F).forEach(id=>{const b=document.createElement('button'),c=document.createElement('canvas');b.className='fb';b.dataset.f=id;c.width=300;c.height=450;fthumb(c,id);b.append(c,F[id].n);if(small)b.lastChild.textContent='';b.title=F[id].n;b.setAttribute('aria-label',F[id].n);b.onclick=()=>cb(id);host.append(b)})}
+function fthumb(cv,id,big){const c=cv.getContext('2d'),W=300,H=450;c.fillStyle=F[id].bg;c.fillRect(0,0,W,H);F[id].draw(c,W,H);[0,1,2].forEach(i=>{const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,['#f6c9d6','#d9cdf2','#cfe0cc'][i]);g.addColorStop(1,'#fff');c.fillStyle=g;rr(c,48,44+i*128,204,112,10);c.fill()})}
+function applyFrame(id){S.frame=id;S.bg=F[id].bg;commit()}
+mkThumbs($('#fg'),applyFrame);mkThumbs($('#fg2'),id=>{applyFrame(id);$('#create').scrollIntoView({behavior:'smooth'})});
+['coquette','burgundy','y2k'].forEach(id=>{const c=document.createElement('canvas');c.width=300;c.height=450;fthumb(c,id);$('#pvs').append(c)});
+$('#lay').innerHTML=[['vertical','Classic strip'],['horizontal','Horizontal'],['polaroid','Polaroid'],['grid','Square grid']].map(([k,n])=>`<button class="chip" data-l="${k}">${n}</button>`).join('');
+$('#cnt').innerHTML=[2,3,4,5,6].map(n=>`<button class="chip" data-n="${n}">${n} photos</button>`).join('');
+$('#lay').onclick=e=>{const b=e.target.closest('[data-l]');if(b){S.layout=b.dataset.l;commit()}};
+$('#cnt').onclick=e=>{const b=e.target.closest('[data-n]');if(b){S.n=+b.dataset.n;commit()}};
+$('#rt').innerHTML=[['fr','Frames'],['st','Stickers'],['fi','Filters'],['sy','Style']].map(([k,n],i)=>`<button class="chip" data-p="${k}" aria-pressed="${!i}">${n}</button>`).join('');
+$('#rt').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;$$('#rt .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));$$('.sub').forEach(s=>s.classList.toggle('on',s.dataset.p===b.dataset.p))};
+$$('.tabs .chip').forEach(b=>b.onclick=()=>{$('#create').dataset.tab=b.dataset.tab;$$('.tabs .chip').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+$('#sc').innerHTML=Object.keys(CATS).map((k,i)=>`<button class="chip" data-c="${k}" aria-pressed="${!i}">${k}</button>`).join('');
+function stickerGrid(cat){$('#sg').innerHTML='';CATS[cat].forEach(k=>{const b=document.createElement('button'),c=document.createElement('canvas');c.width=c.height=100;b.title=b.ariaLabel=SN[k];const x=c.getContext('2d');x.translate(50,50);x.scale(.9,.9);D[k](x);b.append(c);b.onclick=()=>addSticker(k);$('#sg').append(b)})}
+$('#sc').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;$$('#sc .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));stickerGrid(b.dataset.c)};
+function addSticker(k){const l=LAY||layout();const t={id:uid++,k,x:l.W/2+(Math.random()*40-20),y:l.H/2+(Math.random()*40-20),s:1.1,r:0};S.st.push(t);S.ss=t.id;S.sp=null;commit()}
+const sel=()=>S.st.find(t=>t.id===S.ss);
+$('#s-del').onclick=()=>{if(sel()){S.st=S.st.filter(t=>t.id!==S.ss);S.ss=null;commit()}};
+$('#s-dup').onclick=()=>{const t=sel();if(t){const n={...t,id:uid++,x:t.x+24,y:t.y+24};S.st.push(n);S.ss=n.id;commit()}};
+$('#s-up').onclick=()=>{const i=S.st.findIndex(t=>t.id===S.ss);if(i>=0&&i<S.st.length-1){S.st.push(S.st.splice(i,1)[0]);commit()}};
+$('#s-dn').onclick=()=>{const i=S.st.findIndex(t=>t.id===S.ss);if(i>0){S.st.unshift(S.st.splice(i,1)[0]);commit()}};
+/* sliders: input = live, change = commit */
+function bind(id,get,set){const el=$(id);el.oninput=()=>{set(+el.value);el.parentNode.querySelector('output')&&(el.parentNode.querySelector('output').textContent=el.value);draw()};el.onchange=()=>commit()}
+$('#sl').innerHTML=SLD.map(([k,n,a,b])=>`<label class="f">${n}<input type="range" data-k="${k}" min="${a}" max="${b}"><output></output></label>`).join('');
+$$('#sl input').forEach(el=>{el.oninput=()=>{const p=S.photos.find(p=>p.id===S.sp);if(!p)return;p.f[el.dataset.k]=+el.value;p.f.t=p.f.t;el.nextElementSibling.textContent=el.value;draw()};el.onchange=()=>S.sp&&commit()});
+$('#pre').innerHTML=Object.keys(PRE).map(k=>`<button class="chip" data-pr="${k}">${k}</button>`).join('');
+$('#pre').onclick=e=>{const b=e.target.closest('[data-pr]'),p=S.photos.find(p=>p.id===S.sp);if(!b)return;if(!p){msg('Select a photo first.');return}p.f={...NF,...PRE[b.dataset.pr]};commit()};
+$('#fres').onclick=()=>{const p=S.photos.find(p=>p.id===S.sp);if(!p){msg('Select a photo first.');return}p.f={...NF};commit()};
+bind('#s-sz',0,v=>{const t=sel();if(t)t.s=v});bind('#s-rt',0,v=>{const t=sel();if(t)t.r=v});
+bind('#pw',0,v=>S.pw=v);bind('#gap',0,v=>S.gap=v);bind('#pad',0,v=>S.pad=v);bind('#bg',0,v=>S.bg=v);
+$('#ratio').onchange=e=>{S.ratio=e.target.value;commit()};
+$('#rd').onclick=()=>{S.round=1;commit()};$('#sq').onclick=()=>{S.round=0;commit()};
+[['#title','title'],['#cap','cap']].forEach(([id,k])=>{const el=$(id);el.oninput=()=>{S[k]=el.value;draw()};el.onchange=()=>commit()});
+$('#date').onchange=e=>{S.date=e.target.checked?1:0;commit()};
+/* ===== sync UI with state ===== */
+function sync(){
+ const inc=S.photos.filter(p=>p.inc).length,p=S.photos.find(p=>p.id===S.sp);
+ $('#list').innerHTML=S.photos.map((q,i)=>`<div class="th${q.id===S.sp?' sel':''}" data-id="${q.id}"><img src="${TH[q.id]}" alt="Photo ${i+1}"><div class="ac"><input type="checkbox" data-a="inc" ${q.inc?'checked':''} aria-label="Include in strip" title="Include in strip"><button data-a="up" title="Move up" aria-label="Move up">↑</button><button data-a="dn" title="Move down" aria-label="Move down">↓</button><button data-a="rep" title="Replace" aria-label="Replace">⟳</button><button data-a="del" title="Remove" aria-label="Remove">✕</button></div></div>`).join('');
+ $('#lnote').textContent=S.photos.length?`${inc} of ${S.photos.length} photos are included in the strip. Tick the box to include a photo.`:'No photos yet. Upload some or take a few with your camera.';
+ $$('#lay .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===S.layout));$$('#cnt .chip').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.n===S.n));
+ const nd=$('#need');nd.hidden=inc>=S.n||!S.photos.length;nd.textContent=`This strip needs ${S.n} photos but only ${inc} ${inc==1?'is':'are'} included. Upload more or choose a smaller strip.`;
+ $('#empty').classList.toggle('h',S.photos.length>0);
+ $$('.fb').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===S.frame));
+ const setv=(id,v)=>{const e=$(id);e.value=v;const o=e.parentNode.querySelector('output');if(o)o.textContent=v};
+ setv('#pw',S.pw);setv('#gap',S.gap);setv('#pad',S.pad);$('#bg').value=S.bg;$('#ratio').value=S.ratio;$('#title').value=S.title;$('#cap').value=S.cap;$('#date').checked=!!S.date;
+ $('#rd').setAttribute('aria-pressed',!!S.round);$('#sq').setAttribute('aria-pressed',!S.round);
+ $('#ratio').disabled=S.layout==='grid';
+ $('#fnote').textContent=p?'Editing the selected photo only.':'Select a photo (in the list or on the strip) to adjust its filters.';
+ $$('#sl input').forEach(el=>{el.disabled=!p;const v=p?p.f[el.dataset.k]:NF[el.dataset.k];el.value=v;el.nextElementSibling.textContent=v});
+ const t=sel();['#s-dup','#s-del','#s-up','#s-dn','#s-sz','#s-rt'].forEach(i=>$(i).disabled=!t);
+ setv('#s-sz',t?t.s:1);setv('#s-rt',t?Math.round(t.r):0);
+ $('#undo').disabled=hi<=0;$('#redo').disabled=hi>=hist.length-1;
+ draw();
+}
+/* ===== canvas pointer interaction ===== */
+let drag=null;const cv=$('#cv');
+function pt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height}}
+function inv(p,t){const a=-t.r*Math.PI/180,dx=p.x-t.x,dy=p.y-t.y;return{x:(dx*Math.cos(a)-dy*Math.sin(a))/t.s,y:(dx*Math.sin(a)+dy*Math.cos(a))/t.s}}
+cv.onpointerdown=e=>{
+ const p=pt(e),t=sel();cv.setPointerCapture(e.pointerId);
+ if(t){const h=hnd(t);if(Math.hypot(p.x-h.x,p.y-h.y)<24/ds()){drag={m:'rs',t};return}}
+ for(let i=S.st.length-1;i>=0;i--){const s=S.st[i],q=inv(p,s);if(Math.abs(q.x)<=50&&Math.abs(q.y)<=50){S.ss=s.id;S.sp=null;drag={m:'mv',t:s,dx:s.x-p.x,dy:s.y-p.y,moved:0};sync();return}}
+ const ph=S.photos.filter(q=>q.inc);
+ for(let i=LAY.sl.length-1;i>=0;i--){const s=LAY.sl[i],q=ph[i];if(!q)continue;const a=-s.r,dx=p.x-s.x,dy=p.y-s.y,lx=dx*Math.cos(a)-dy*Math.sin(a),ly=dx*Math.sin(a)+dy*Math.cos(a);
+  if(Math.abs(lx)<=s.w/2&&Math.abs(ly)<=s.h/2){const im=IMG[q.id],k=Math.max(s.w/im.width,s.h/im.height);S.sp=q.id;S.ss=null;drag={m:'cr',q,s,x:p.x,y:p.y,cx:q.cx,cy:q.cy,rx:im.width*k-s.w,ry:im.height*k-s.h,moved:0};sync();return}}
+ S.sp=S.ss=null;sync();
+};
+cv.onpointermove=e=>{
+ if(!drag)return;const p=pt(e);
+ if(drag.m==='mv'){drag.t.x=p.x+drag.dx;drag.t.y=p.y+drag.dy;drag.moved=1}
+ else if(drag.m==='rs'){const t=drag.t,dx=p.x-t.x,dy=p.y-t.y;t.s=clamp(Math.hypot(dx,dy)/(50*Math.SQRT2),.3,4);t.r=Math.round((Math.atan2(dy,dx)*180/Math.PI-45+540)%360-180);drag.moved=1}
+ else if(drag.m==='cr'){const q=drag.q;if(drag.rx>1)q.cx=clamp(drag.cx-(p.x-drag.x)/drag.rx,0,1);if(drag.ry>1)q.cy=clamp(drag.cy-(p.y-drag.y)/drag.ry,0,1);drag.moved=1}
+ draw();
+};
+cv.onpointerup=cv.onpointercancel=()=>{if(drag&&drag.moved){drag=null;commit()}else{drag=null;sync()}};
+document.addEventListener('keydown',e=>{if((e.key==='Delete'||e.key==='Backspace')&&S.ss&&!/INPUT|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$('#s-del').click()}});
+/* ===== actions ===== */
+$('#undo').onclick=()=>go(hi-1);$('#redo').onclick=()=>go(hi+1);
+$('#reset').onclick=()=>{if(confirm('Reset the design? Frame, style, stickers and filters go back to default. Your photos stay.')){const ph=S.photos.map(p=>({...p,f:{...NF},cx:.5,cy:.5,inc:1}));S={...DEF(),photos:ph};commit()}};
+$('#newb').onclick=()=>{S=DEF();hist=[];hi=-1;commit();msg('Fresh strip ready.')};
+$('#cta').onclick=()=>$('#create').scrollIntoView({behavior:'smooth'});
+$('#dl').onclick=async()=>{
+ try{
+  if(!S.photos.some(p=>p.inc)){msg('Add at least one photo before downloading.');return}
+  const l=layout(),K=2,c=document.createElement('canvas');c.width=l.W*K;c.height=l.H*K;render(c.getContext('2d'),K,false);
+  const blob=await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(new Error('blob')),'image/png'));
+  let d=null;try{d=window.claude&&await window.claude.use('downloads')}catch(_){}
+  if(d){await d.save({filename:'SnapBloom-Photostrip.png',data:blob});msg('Your strip is saved.')}
+  else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SnapBloom-Photostrip.png';document.body.appendChild(a);a.click();a.remove();msg('Your strip is downloading.')}
+ }catch(err){if(!err||err.code!=='declined')msg('Could not export the image. Please try again.')}
+};
+/* ===== init ===== */
+stickerGrid('Cute');
+Promise.all(['italic 600 34px Fraunces','28px Caveat','500 16px "DM Sans"'].map(f=>document.fonts.load(f).catch(()=>0))).then(()=>draw());
+commit();
+</script>
+</body>
+</html>
