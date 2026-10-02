@@ -16,9 +16,10 @@ button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;ba
 :focus-visible{outline:2px solid var(--burg);outline-offset:2px}
 h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:500}
 nav{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:12px clamp(14px,4vw,48px);background:rgba(255,249,243,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.logo{font:italic 600 26px Fraunces,serif;display:flex;gap:8px;align-items:center}
-nav div a{margin-left:clamp(10px,2.5vw,26px);text-decoration:none;font-weight:500;font-size:15px}
-nav a:hover{text-decoration:underline}
+.logo{font:italic 600 26px Fraunces,serif;display:flex;gap:8px;align-items:center;color:var(--burg)}
+nav div a{margin-left:clamp(10px,2.5vw,26px);text-decoration:none;font-weight:500;font-size:15px;color:var(--burg);transition:.25s}
+nav div a{padding:7px 14px;border-radius:99px}
+nav div a:hover{background:var(--pink)}
 .btn{padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:#fff;font-weight:500;font-size:14px;transition:.25s}
 .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 18px rgba(114,47,69,.15)}
 .btn:disabled{opacity:.4;cursor:default}
