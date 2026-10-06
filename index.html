@@ -26,7 +26,8 @@ nav div a:hover{background:var(--pink)}
 .btn:disabled{opacity:.4;cursor:default}
 .btn.p{background:var(--burg);color:var(--cream);border-color:transparent}
 .btn.big{padding:15px 30px;font-size:16px}
-.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;max-width:1180px;margin:0 auto;padding:clamp(30px,6vw,70px) clamp(16px,4vw,48px);background:radial-gradient(50% 60% at 90% 30%,var(--lav),transparent 70%),radial-gradient(40% 50% at 0% 100%,var(--pink),transparent 70%)}
+.hero{position:relative;isolation:isolate;display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;max-width:none;margin:0;padding:clamp(30px,6vw,70px) max(clamp(16px,4vw,48px),calc((100% - 1180px)/2 + clamp(16px,4vw,48px)))}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(45% 60% at 85% 35%,var(--lav),transparent 75%),radial-gradient(40% 50% at 8% 90%,var(--pink),transparent 75%);-webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);mask-image:linear-gradient(to bottom,#000 55%,transparent 100%)}
 .hero h1{font-size:clamp(38px,6vw,68px);line-height:1.04;font-style:italic}
 .hero p{margin:18px 0 26px;font-size:18px;line-height:1.55;max-width:460px;opacity:.85}
 .pvs{display:flex;gap:14px;justify-content:center;align-items:center}
@@ -78,6 +79,17 @@ input[type=range]{accent-color:var(--burg);width:100%;height:28px}input[type=col
 .cwb .shr{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0;align-items:center}.cwb .shr span{font-size:12px;opacity:.75;margin-right:2px}
 .cwb .cwa{display:flex;gap:6px;flex-wrap:wrap}
 .cwb .cwa .chip:disabled{opacity:.45;cursor:not-allowed}
+/* frames carousel (2 rows, swipe / arrows) */
+.fcar{position:relative;margin:6px 0 4px}
+.fsc{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:96px;gap:14px 6px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;scrollbar-width:none;padding:4px 2px 6px;-webkit-overflow-scrolling:touch}
+.fsc::-webkit-scrollbar{display:none}
+.fsc .fb{scroll-snap-align:start;padding:12px 6px 14px;border-radius:20px;font-size:13px;line-height:1.25;justify-content:flex-start;gap:9px;min-height:150px}
+.fsc .fb canvas{width:68px;border-radius:9px;border:1px solid rgba(114,47,69,.12);box-shadow:0 3px 10px rgba(114,47,69,.14)}
+.fsc .fb:hover{background:rgba(248,221,229,.55);transform:none}
+.fsc .fb[aria-pressed=true]{background:#F9DEE2;box-shadow:none}
+.fcar .ar{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;box-shadow:0 4px 12px rgba(114,47,69,.18)}
+.fcar #fl{left:-14px}.fcar #fr{right:-14px}
+.fcar .ar:focus-visible{outline:2px solid var(--burg);outline-offset:2px}
 .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
 .sg button{aspect-ratio:1;border-radius:12px;background:#fff;border:1px solid var(--line);transition:.2s;padding:3px}.sg button:hover{background:var(--pink);transform:scale(1.07)}
 .sg canvas{width:100%;height:100%}
@@ -121,7 +133,7 @@ input[type=range]{accent-color:var(--burg);width:100%;height:28px}input[type=col
   <div class="cwrap" id="cw"><canvas id="cv" aria-label="Photo strip preview"></canvas><div class="empty" id="empty"><span>Add photos to fill your strip<br><small style="font:14px 'DM Sans'">Upload from your device or use the camera</small></span></div></div>
   <aside class="pn" id="R">
    <div class="row" id="rt"></div>
-   <div class="sub on" data-p="fr"><h3>Frames</h3><div class="fg" id="fg" style="grid-template-columns:repeat(3,1fr)"></div></div>
+   <div class="sub on" data-p="fr"><h3>Frames</h3><div class="fcar"><button class="ar" id="fl" aria-label="Previous frames">&#8249;</button><div class="fsc" id="fg"></div><button class="ar" id="fr" aria-label="More frames">&#8250;</button></div></div>
    <div class="sub" data-p="st"><h3>Stickers</h3><div class="cs"><button class="ar" id="scl" aria-label="Previous categories">&#8249;</button><div class="row" id="sc"></div><button class="ar" id="scr" aria-label="More categories">&#8250;</button></div><div class="cwb" id="cwb" hidden><div class="cwr"><canvas id="cwpv" width="100" height="100" aria-label="Preview"></canvas><input id="cwt" maxlength="14" placeholder="Type your word…" aria-label="Your word"></div><div class="shr" id="cwh"><span>Shape</span></div><div class="sw" id="cws"><span>Colour</span></div><div class="cwa"><button class="chip" id="cwadd" type="button">+ Add word sticker</button><button class="chip" id="cwupd" type="button" disabled>Update selected</button></div></div><div class="sg" id="sg"></div>
     <h3>Selected sticker</h3><div class="row"><button class="chip" id="s-dup">Duplicate</button><button class="chip" id="s-del">Delete</button><button class="chip" id="s-up">Bring forward</button><button class="chip" id="s-dn">Send back</button></div>
     <label class="f">Size<input type="range" id="s-sz" min="0.3" max="4" step="0.05"><output></output></label><label class="f">Rotate<input type="range" id="s-rt" min="-180" max="180"><output></output></label>
@@ -260,6 +272,11 @@ function layout(){
  if(S.layout==='vertical'){const h=pw/r;W=pw+2*p;H=2*p+n*h+(n-1)*g+ft;for(let i=0;i<n;i++)sl.push({x:p+pw/2,y:p+h/2+i*(h+g),w:pw,h,r:0})}
  else if(S.layout==='horizontal'){const w=pw*.62,h=w/r;W=2*p+n*w+(n-1)*g;H=2*p+h+ft;for(let i=0;i<n;i++)sl.push({x:p+w/2+i*(w+g),y:p+h/2,w,h,r:0})}
  else if(S.layout==='grid'){const cols=n==3||n>4?3:2,rows=Math.ceil(n/cols),w=pw*(cols==2?.7:.5),h=w;W=2*p+cols*w+(cols-1)*g;H=2*p+rows*h+(rows-1)*g+ft;for(let i=0;i<n;i++)sl.push({x:p+w/2+(i%cols)*(w+g),y:p+h/2+Math.floor(i/cols)*(h+g),w,h,r:0})}
+
+ else if(S.layout==='hero'){const m=n-1,cols=m<=3?m:Math.ceil(m/2),rows=Math.ceil(m/cols),bh=pw/r,w=(pw-(cols-1)*g)/cols,h=w/r;W=pw+2*p;H=2*p+bh+g+rows*h+(rows-1)*g+ft;sl.push({x:p+pw/2,y:p+bh/2,w:pw,h:bh,r:0});for(let i=0;i<m;i++){const row=Math.floor(i/cols),rc=Math.min(cols,m-row*cols),x0=p+(pw-(rc*w+(rc-1)*g))/2;sl.push({x:x0+w/2+(i%cols)*(w+g),y:p+bh+g+h/2+row*(h+g),w,h,r:0})}}
+ else if(S.layout==='double'){const w=pw*.5,h=w/r,rows=Math.ceil(n/2),sh=h*.4;W=2*p+2*w+g;H=2*p+rows*h+(rows-1)*g+sh+ft;for(let i=0;i<n;i++)sl.push({x:p+w/2+(i%2)*(w+g),y:p+h/2+Math.floor(i/2)*(h+g)+(i%2?sh:0),w,h,r:0})}
+ else if(S.layout==='mosaic'){const m=n-1,w=(pw-g)/2,h2=w/r,th=m*h2+(m-1)*g;W=pw+2*p;H=2*p+th+ft;sl.push({x:p+w/2,y:p+th/2,w,h:th,r:0});for(let i=0;i<m;i++)sl.push({x:p+w+g+w/2,y:p+h2/2+i*(h2+g),w,h:h2,r:0})}
+ else if(S.layout==='scatter'){const w=pw*.62,h=w/r,st=h+66+g*.5,dx=pw*.14;W=2*p+w+28+dx*2;let y0=p+14+h/2;H=2*p+14+h+(n-1)*st+46+ft;for(let i=0;i<n;i++)sl.push({x:W/2+(i%2?dx:-dx),y:y0+i*st,w,h,r:[-4,3.5,-2.5,4,-3,2.5][i]*Math.PI/180,card:1})}
  else{const w=pw*.6,h=w/r,cw=w+28,ch=h+60,rows=Math.ceil(n/2);W=2*p+2*cw+g+14;H=2*p+rows*ch+(rows-1)*(g+4)+ft+22;for(let i=0;i<n;i++)sl.push({x:p+cw/2+14+(i%2)*(cw+g),y:p+22+14+h/2+Math.floor(i/2)*(ch+g+4)+(i%2?18:0),w,h,r:[-3,2.5,-1.5,3,-2.5,1.5][i]*Math.PI/180,card:1})}
  return{W:Math.round(W),H:Math.round(H),sl,ty:Math.round(H-p-ft+34)};
 }
@@ -342,8 +359,13 @@ function mkThumbs(host,cb,small){host.innerHTML='';Object.keys(F).forEach(id=>{c
 function fthumb(cv,id,big){const c=cv.getContext('2d'),W=300,H=450;c.fillStyle=F[id].bg;c.fillRect(0,0,W,H);F[id].draw(c,W,H);[0,1,2].forEach(i=>{const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,['#f6c9d6','#d9cdf2','#cfe0cc'][i]);g.addColorStop(1,'#fff');c.fillStyle=g;rr(c,48,44+i*128,204,112,10);c.fill()})}
 function applyFrame(id){S.frame=id;S.bg=F[id].bg;commit()}
 mkThumbs($('#fg'),applyFrame);mkThumbs($('#fg2'),id=>{applyFrame(id);$('#create').scrollIntoView({behavior:'smooth'})});
+
+const fsc=$('#fg'),farr=()=>{$('#fl').disabled=fsc.scrollLeft<4;$('#fr').disabled=fsc.scrollLeft+fsc.clientWidth>=fsc.scrollWidth-4};
+$('#fl').onclick=()=>fsc.scrollBy({left:-fsc.clientWidth*.8});$('#fr').onclick=()=>fsc.scrollBy({left:fsc.clientWidth*.8});
+fsc.addEventListener('scroll',farr);addEventListener('resize',farr);setTimeout(farr,80);
+function showFrame(){const b=fsc.querySelector('.fb[aria-pressed=true]');if(!b)return;const l=b.offsetLeft-fsc.offsetLeft,r=l+b.offsetWidth;if(l<fsc.scrollLeft||r>fsc.scrollLeft+fsc.clientWidth)fsc.scrollTo({left:Math.max(0,l-8),behavior:'smooth'})}
 ['coquette','burgundy','y2k'].forEach(id=>{const c=document.createElement('canvas');c.width=300;c.height=450;fthumb(c,id);$('#pvs').append(c)});
-$('#lay').innerHTML=[['vertical','Classic strip'],['horizontal','Horizontal'],['polaroid','Polaroid'],['grid','Square grid']].map(([k,n])=>`<button class="chip" data-l="${k}">${n}</button>`).join('');
+$('#lay').innerHTML=[['vertical','Classic strip'],['horizontal','Horizontal'],['polaroid','Polaroid'],['grid','Square grid'],['hero','Big + small'],['mosaic','Left tall'],['double','Staggered'],['scatter','Scatter cards']].map(([k,n])=>`<button class="chip" data-l="${k}">${n}</button>`).join('');
 $('#cnt').innerHTML=[2,3,4,5,6].map(n=>`<button class="chip" data-n="${n}">${n} photos</button>`).join('');
 $('#lay').onclick=e=>{const b=e.target.closest('[data-l]');if(b){S.layout=b.dataset.l;commit()}};
 $('#cnt').onclick=e=>{const b=e.target.closest('[data-n]');if(b){S.n=+b.dataset.n;commit()}};
@@ -415,7 +437,7 @@ function sync(){
  $$('#lay .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===S.layout));$$('#cnt .chip').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.n===S.n));
  const nd=$('#need');nd.hidden=inc>=S.n||!S.photos.length;nd.textContent=`This strip needs ${S.n} photos but only ${inc} ${inc==1?'is':'are'} included. Upload more or choose a smaller strip.`;
  $('#empty').classList.toggle('h',S.photos.length>0);
- $$('.fb').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===S.frame));
+ $$('.fb').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===S.frame));showFrame();
  const setv=(id,v)=>{const e=$(id);e.value=v;const o=e.parentNode.querySelector('output');if(o)o.textContent=v};
  setv('#pw',S.pw);setv('#gap',S.gap);setv('#pad',S.pad);$('#bg').value=S.bg;$('#ratio').value=S.ratio;$('#title').value=S.title;$('#cap').value=S.cap;$('#date').checked=!!S.date;
  $('#rd').setAttribute('aria-pressed',!!S.round);$('#sq').setAttribute('aria-pressed',!S.round);
