@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FBE3E9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SnapBloom">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>SnapBloom — Photobooth</title>
    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' rx='7' fill='%23FBE3E9'/%3E%3Crect x='3' y='8' width='20' height='14' rx='4.5' fill='%235E3A47'/%3E%3Ccircle cx='13' cy='15' r='4.2' fill='%23FBE3E9'/%3E%3Ccircle cx='13' cy='15' r='1.8' fill='%235E3A47'/%3E%3Cpath d='M8.5 8l1.4-3h6.2l1.4 3' fill='%235E3A47'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -532,6 +540,7 @@ $('#dl').onclick=async()=>{
 stickerGrid('Cute');
 document.fonts&&document.fonts.ready.then(()=>{SPR.clear();draw();const b=$('#sc .chip[aria-pressed=true]');stickerGrid(b?b.dataset.c:'Cute')});
 Promise.all(['italic 600 34px Fraunces','28px Caveat','500 16px "DM Sans"'].map(f=>document.fonts.load(f).catch(()=>0))).then(()=>draw());
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 commit();
 </script>
 </body>
